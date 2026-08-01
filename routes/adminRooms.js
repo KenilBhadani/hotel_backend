@@ -1,10 +1,17 @@
 const express = require("express");
 const router = express.Router();
 const Room = require("../models/RoomListing");
-const upload = require("../middleware/upload");
-const fs = require("fs");
-const path = require("path");
+const upload = require("../middleware/uploadCloudinary");
+const { deleteFromCloudinary } = require("../config/cloudinary");
 const createRoomInstancesForListing = require("../utils/createRoomInstances");
+
+const getCloudinaryPublicId = (imageUrl) => {
+  if (!imageUrl || typeof imageUrl !== "string") return "";
+  const parts = imageUrl.split("/");
+  const lastPart = parts[parts.length - 1];
+  const withoutExt = lastPart.split(".")[0];
+  return withoutExt;
+};
 
 /* ======================================================
    GET ALL ROOMS (ADMIN)
@@ -37,7 +44,7 @@ router.post("/", upload.array("images", 5), async (req, res) => {
       capacity,
       bedType,
       totalRooms,
-      availableRooms, // frontend sends this, treat as totalRooms
+      availableRooms,
       amenities,
       planName,
       inclusions,
@@ -70,6 +77,10 @@ router.post("/", upload.array("images", 5), async (req, res) => {
       });
     }
 
+    const imageFiles = req.files || [];
+    const uploadedImages = imageFiles.map((file) => file.path);
+    const uploadedPublicIds = imageFiles.map((file) => file.filename);
+
     const room = await Room.create({
       title,
       description,
@@ -79,7 +90,9 @@ router.post("/", upload.array("images", 5), async (req, res) => {
       bedType,
       totalRooms: Number(totalRooms || availableRooms),
 
-      images: req.files?.map((f) => `uploads/${f.filename}`) || [],
+      images: uploadedImages,
+      image: uploadedImages[0] || "",
+      public_id: uploadedPublicIds[0] || "",
 
       amenities: amenities
         ? amenities.split(",").map((a) => a.trim())
@@ -136,32 +149,50 @@ router.put("/:id", upload.array("images", 5), async (req, res) => {
       }
     }
 
-    // ✅ Image limit check
     const existingImages = room.images?.length || 0;
     const newImages = req.files?.length || 0;
 
     if (existingImages + newImages > 5) {
-      req.files?.forEach((f) => {
-        const fp = path.join(__dirname, "..", "uploads", f.filename);
-        if (fs.existsSync(fp)) fs.unlinkSync(fp);
-      });
       return res.status(400).json({ message: "Max 5 images allowed" });
     }
 
-    // ✅ Append images
     if (req.files?.length) {
-      room.images.push(...req.files.map((f) => `uploads/${f.filename}`));
+      for (const imageUrl of room.images || []) {
+        if (typeof imageUrl === "string" && imageUrl.includes("res.cloudinary.com")) {
+          const publicId = getCloudinaryPublicId(imageUrl);
+          if (publicId) {
+            await deleteFromCloudinary(publicId);
+          }
+        }
+      }
+
+      const uploadedImages = req.files.map((file) => file.path);
+      const uploadedPublicIds = req.files.map((file) => file.filename);
+      room.images = uploadedImages;
+      room.image = uploadedImages[0] || "";
+      room.public_id = uploadedPublicIds[0] || "";
     }
 
-    // ✅ Remove images
     if (req.body.removeImages) {
       const removeList = JSON.parse(req.body.removeImages);
+      const removePublicIds = room.public_id ? [room.public_id] : [];
+
       room.images = room.images.filter((img) => !removeList.includes(img));
 
-      removeList.forEach((img) => {
-        const fp = path.join(__dirname, "..", img);
-        if (fs.existsSync(fp)) fs.unlinkSync(fp);
-      });
+      if (room.images.length === 0) {
+        room.image = "";
+        room.public_id = "";
+      } else if (removeList.includes(room.image)) {
+        room.image = room.images[0] || "";
+        room.public_id = room.public_id ? room.public_id : "";
+      }
+
+      for (const imageUrl of removeList) {
+        const matchingPublicId = room.public_id && imageUrl === room.image ? room.public_id : "";
+        if (matchingPublicId) {
+          await deleteFromCloudinary(matchingPublicId);
+        }
+      }
     }
 
     // ✅ Update fields
@@ -289,11 +320,24 @@ router.delete("/:id/images", async (req, res) => {
       return res.status(404).json({ message: "Room not found" });
     }
 
+    const wasPrimary = room.image === image;
     room.images = room.images.filter((img) => img !== image);
+
+    if (room.images.length === 0) {
+      room.image = "";
+      room.public_id = "";
+    } else if (wasPrimary) {
+      room.image = room.images[0];
+    }
+
     await room.save();
 
-    const fp = path.join(__dirname, "..", image);
-    if (fs.existsSync(fp)) fs.unlinkSync(fp);
+    if (typeof image === "string" && image.includes("res.cloudinary.com")) {
+      const publicId = getCloudinaryPublicId(image);
+      if (publicId) {
+        await deleteFromCloudinary(publicId);
+      }
+    }
 
     res.json({ success: true, images: room.images });
   } catch (err) {
@@ -320,7 +364,21 @@ router.delete("/:id", async (req, res) => {
     const deletedInstances = await RoomInstance.deleteMany({ roomListing: roomId });
     console.log(`Deleted ${deletedInstances.deletedCount} room instances`);
 
-    // Delete the room listing itself
+    if (room.public_id) {
+      await deleteFromCloudinary(room.public_id);
+    }
+
+    if (room.images?.length) {
+      for (const imageUrl of room.images) {
+        if (typeof imageUrl === "string" && imageUrl.includes("res.cloudinary.com")) {
+          const publicId = getCloudinaryPublicId(imageUrl);
+          if (publicId) {
+            await deleteFromCloudinary(publicId);
+          }
+        }
+      }
+    }
+
     await Room.findByIdAndDelete(roomId);
 
     res.json({

@@ -23,6 +23,8 @@ const RoomListingSchema = new mongoose.Schema(
     },
 
     images: [String],
+    image: { type: String, default: "" },
+    public_id: { type: String, default: "" },
 
     rates: {
       planName: String,

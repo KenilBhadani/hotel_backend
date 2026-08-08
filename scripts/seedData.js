@@ -67,6 +67,7 @@ async function seedData() {
       staffId: "STF003",
       name: "Bob Housekeeping",
       email: "housekeeping@hotel.com",
+      phone: "1234567890",
       role: "Housekeeping",
       password: await bcrypt.hash("password123", 10),
     });
@@ -83,6 +84,7 @@ async function seedData() {
       bookingStatus: "Checked-in",
       firstName: "Raj",
       lastName: "Kumar",
+      totalAmount: 1500,
       checkIn: new Date(Date.now() - 86400000),
       checkOut: new Date(Date.now() + 86400000),
     });

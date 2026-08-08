@@ -70,8 +70,6 @@ const staffSchema = new mongoose.Schema(
 );
 
 // ✅ Performance Indexes
-staffSchema.index({ email: 1 });
 staffSchema.index({ isActive: 1, role: 1 });
-staffSchema.index({ staffId: 1 });
 
 module.exports = mongoose.model("Staff", staffSchema);

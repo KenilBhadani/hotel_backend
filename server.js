@@ -28,6 +28,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // 5️⃣ Session & Passport setup
+app.set("trust proxy", 1); // Trust proxy required for secure cookies on Render
 app.use(session({
   secret: process.env.SESSION_SECRET || "change_this_secret",
   resave: false,

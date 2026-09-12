@@ -136,7 +136,19 @@ router.post('/', async (req, res) => {
 
         const finalMessage = response.messages[response.messages.length - 1];
 
-        res.json({ reply: finalMessage.content });
+        let replyText = "";
+        if (typeof finalMessage.content === "string") {
+            replyText = finalMessage.content;
+        } else if (Array.isArray(finalMessage.content)) {
+            replyText = finalMessage.content
+                .filter(part => part.type === "text")
+                .map(part => part.text)
+                .join("\n");
+        } else {
+            replyText = JSON.stringify(finalMessage.content);
+        }
+
+        res.json({ reply: replyText });
     } catch (error) {
         console.error("Chatbot Agent Error:", error);
         res.status(500).json({ error: "An error occurred while communicating with the AI." });

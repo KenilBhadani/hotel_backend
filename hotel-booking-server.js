@@ -141,6 +141,9 @@ app.use(express.urlencoded({ extended: true }));
 // Static files
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// Chatbot Route
+app.use("/api/chatbot", require("./routes/chatbot"));
+
 // =======================================
 // AUTHENTICATION MIDDLEWARE (Simplified)
 // =======================================

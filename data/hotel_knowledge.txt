@@ -1,0 +1,26 @@
+Welcome to the Royal Park Hotel!
+
+# General Information
+- The hotel is located in the heart of the city, at 123 Main Street.
+- Check-in time is at 2:00 PM.
+- Check-out time is at 11:00 AM.
+- The hotel offers free Wi-Fi for all guests.
+- Our contact phone number is +1 (555) 123-4567.
+- Our email is info@royalparkhotel.com.
+
+# Amenities
+- We have a rooftop swimming pool that is open from 8:00 AM to 10:00 PM.
+- Our fitness center is open 24/7 for all guests.
+- We offer complimentary breakfast from 6:30 AM to 10:00 AM in the main dining hall.
+- Spa services are available on the 2nd floor from 9:00 AM to 8:00 PM (reservation required).
+
+# Room Types
+- Standard Room: Includes a queen-sized bed, city view, and a minibar.
+- Deluxe Room: Includes a king-sized bed, ocean view, and a private balcony.
+- Suite: Includes a separate living area, king-sized bed, premium ocean view, and complimentary wine.
+
+# Policies
+- Pets are not allowed, with the exception of service animals.
+- Smoking is strictly prohibited inside the hotel rooms. A $250 cleaning fee will be charged for smoking in rooms.
+- Cancellations made 48 hours prior to the check-in date are fully refundable.
+- Late check-out is available upon request and subject to availability (additional fees may apply).

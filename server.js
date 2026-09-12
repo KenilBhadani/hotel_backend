@@ -83,6 +83,7 @@ app.use("/api/reviews", require("./routes/review"));
 app.use("/api/subscribe", require("./routes/subscribe"));
 app.use("/api/contact", require("./routes/contact"));
 app.use("/api/admin", require("./routes/adminDashboard"));
+app.use("/api/chatbot", require("./routes/chatbot"));
 
 // 11️⃣ Stripe payment intent
 app.post("/api/bookings/create-payment-intent", async (req, res) => {

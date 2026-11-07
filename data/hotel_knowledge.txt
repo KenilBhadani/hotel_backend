@@ -24,3 +24,9 @@ Welcome to the Royal Park Hotel!
 - Smoking is strictly prohibited inside the hotel rooms. A $250 cleaning fee will be charged for smoking in rooms.
 - Cancellations made 48 hours prior to the check-in date are fully refundable.
 - Late check-out is available upon request and subject to availability (additional fees may apply).
+
+# Live Information and Customer Privacy
+- Room availability changes over time. Always use the live room-availability lookup for date-specific questions; do not infer availability from this document.
+- Account profiles and booking records are private customer data. A signed-in customer may ask about their own profile or bookings, which must be retrieved using the account-scoped lookup.
+- Never ask for an email address to search customer records, and never disclose another customer's profile or booking details.
+- If a customer is not signed in, explain that they must sign in to view personal details. Do not guess or invent customer information.
